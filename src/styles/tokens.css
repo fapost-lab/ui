@@ -1,6 +1,6 @@
 /*
- * Design tokens of the kit (Warm Minimal). The kit's styles.css brings them to the console; the flow builder
- * (resources/css/builder.css) imports this file on its own.
+ * Design tokens of the kit (Warm Minimal). styles.css brings them to a host page; a page that renders without the
+ * kit's Tailwind theme (FaPost Core's flow builder) imports this file on its own as `@fapost/ui/tokens.css`.
  * Custom properties only: no Tailwind, no selectors beyond :root and .dark.
  */
 :root {
