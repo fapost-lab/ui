@@ -1,0 +1,3 @@
+/* What the README tells a host application to write: its own Tailwind, then the kit. No classes of our own. */
+@import 'tailwindcss';
+@import '@fapost/ui/styles.css';
