@@ -1,0 +1,58 @@
+# The checks a change has to pass before it reaches main, and before a release
+# is published (release.yml calls this workflow).
+#
+# The package ships source, so there is no build to check; what can break for a
+# consumer is the types, the behaviour, the `exports` map and whether a
+# consumer's Tailwind finds the kit's classes inside node_modules. The smoke step
+# installs the packed tarball into a Vite + Tailwind 4 application and checks
+# exactly that.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A new push to the same pull request supersedes the previous run.
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  # Kept in step with FaPost Core's CI: Core type-checks the kit's source with
+  # its own vue-tsc, so both run the same toolchain.
+  NODE_VERSION: "26"
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pinned to a commit rather than a tag: a tag can be moved to point at
+      # different code, and release.yml runs these steps before publishing.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - name: Types
+        run: npm run type-check
+      - name: Tests
+        run: npm test
+      - name: Exports
+        # Every target of `exports` exists, surface.json resolves through it,
+        # src/index.ts re-exports exactly surface.json, nothing is deep-only.
+        run: npm run check-exports
+      - name: Smoke
+        # npm pack, install the tarball into smoke/, vite build, and assert the
+        # CSS holds classes only the kit's components use.
+        run: npm run smoke
