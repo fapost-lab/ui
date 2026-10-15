@@ -1,0 +1,80 @@
+# Publishes @fapost/ui to npm when a `v*` tag is pushed.
+#
+# The tag is the release: it must name the version package.json already has
+# (bumped, with its CHANGELOG section, in the pull request before it). The same
+# checks as CI run on the tagged commit first; then the package is published
+# with provenance, and a GitHub Release is made from the CHANGELOG section.
+#
+# Authentication: the first publish uses the NPM_TOKEN secret of the `npm`
+# environment (a granular token that may publish to @fapost), because npm only
+# lets a Trusted Publisher be configured for a package that already exists.
+# Once 0.1.0 is out, this workflow is registered as the Trusted Publisher, the
+# secret is deleted, and npm authenticates the run through OIDC (id-token).
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    name: Checks
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish to npm
+    needs: checks
+    runs-on: ubuntu-latest
+    # Holds the token; protection rules on the environment gate every publish.
+    environment: npm
+    permissions:
+      contents: write # the GitHub Release
+      id-token: write # npm provenance, and Trusted Publishing after 0.1.0
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          registry-url: https://registry.npmjs.org
+
+      - name: Tag matches the version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version} (expected v${version})."
+            exit 1
+          fi
+
+      - name: Release notes from the CHANGELOG
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v heading="## ${version}" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > "${RUNNER_TEMP}/notes.md"
+          if [ ! -s "${RUNNER_TEMP}/notes.md" ]; then
+            echo "::error::CHANGELOG.md has no '## ${version}' section."
+            exit 1
+          fi
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          # Empty once the secret is deleted: npm then uses OIDC.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: GitHub Release
+        run: gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --notes-file "${RUNNER_TEMP}/notes.md" --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
