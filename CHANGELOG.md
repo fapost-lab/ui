@@ -8,6 +8,17 @@ break. Everything reachable through `exports` in `package.json` is public.
 
 ## Unreleased
 
+### Changed
+
+- `badge`: `StatusDot` with a label renders as a soft badge in its tone (dot, then label), like the other status badges;
+  without a label it stays the bare dot.
+
+### Fixed
+
+- `switch`: the track keeps its width (`min-w-10`) when a caller passes a width class, and the thumb has a border and the
+  unchecked track an inner shadow, so both read on a card.
+- `data-table`: the `toolbar` slot is always right-aligned, with or without a search box.
+
 ## 0.1.0
 
 The kit leaves FaPost Core and becomes a package of its own. Its history comes along: the commits before this release
