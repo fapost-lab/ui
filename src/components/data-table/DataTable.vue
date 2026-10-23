@@ -35,7 +35,7 @@ import type { DataTableColumn } from './types'
  * Slots:
  *  - `cell-<key>` (row)   : the content of a cell, instead of the row's value;
  *  - `actions` (row)      : the last cell of a row, for its buttons;
- *  - `toolbar`            : beside the search, for a "New" button and the screen's filters; gets `filters` (the applied
+ *  - `toolbar`            : beside the search, always right-aligned, for a "New" button and the screen's filters; gets `filters` (the applied
  *                           ones), `setFilter(key, value)` (an empty value clears it), `group` (the key of the grouping
  *                           applied, '') and `setGroup(key)`; each change starts over on the first page;
  *  - `bulk-actions` (selected, clear): shown while rows are ticked (needs `selectable`);
@@ -242,7 +242,7 @@ function ariaSort(column: DataTableColumn): 'ascending' | 'descending' | 'none' 
         </Button>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
         <slot name="toolbar" :filters="state.filters ?? {}" :set-filter="setFilter" :group="state.group ?? ''" :set-group="setGroup" />
       </div>
     </div>
