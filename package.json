@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "@fapost/ui",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "The FaPost console kit: Warm Minimal design tokens, a Tailwind 4 theme and Vue 3 components on reka-ui, shipped as source.",
     "keywords": [
         "fapost",
