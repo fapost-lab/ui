@@ -6,6 +6,13 @@ event or slot removed or changed in meaning, or a new major of a peer dependency
 **BREAKING:**; a patch release (`0.x.PATCH`) only adds and fixes. So `^0.1.0` takes every addition and stops at a real
 break. Everything reachable through `exports` in `package.json` is public.
 
+## Unreleased
+
+### Added
+
+- `meter`: `Meter` shows a measured value in a known range (`value`, `max`, `tone`, `label`) as a track with a fill,
+  with the `meter` role for screen readers; `meterValue` and the `MeterTone` type come with it.
+
 ## 0.1.1
 
 ### Changed

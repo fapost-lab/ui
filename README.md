@@ -248,6 +248,7 @@ as variable fonts from Fontsource.
 | `components/input` | A text input |
 | `components/label` | A form label |
 | `components/localized-field` | A text in each language, one tab per language, with per-language errors |
+| `components/meter` | A measured value in a known range, such as a limit in use: a track with a fill in a tone, read as a meter |
 | `components/options-picker` | Chooses some of a fixed list; the choices show as chips |
 | `components/select` | A single-choice select |
 | `components/separator` | A horizontal or vertical rule |
